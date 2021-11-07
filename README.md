@@ -1,3 +1,7 @@
+# Prokounter
+An R package for differential richness inference. 
+
+Reference: `BIORXIV LINK`
 
 ```{r}
 #installation
