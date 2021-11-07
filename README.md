@@ -1,7 +1,7 @@
 # Prokounter
-An R package for differential richness inference. 
+The respository contains the source code for the R package, Prokounter, for making differential richness inferences from 16S microbiome data. 
 
-Reference: `BIORXIV LINK`
+For more details, please refer: `BIORXIV LINK`
 
 ```{r}
 #installation
