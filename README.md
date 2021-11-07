@@ -6,7 +6,7 @@ For more details, please refer: `BIORXIV LINK`
 ```{r}
 #installation
 library(devtools)
-devtools::install_github("mskb01/prokounter") 
+devtools::install_github("mskb01/prokounter", ref="main") 
 
 
 #usage
