@@ -1,0 +1,73 @@
+---
+title: "Differential richness inference for 16S surveys with Prokounter"
+author: "M. Senthil Kumar"
+date: "9/16/2021"
+output:
+  pdf_document: default
+  html_document: default
+vignette: |
+  %\VignetteIndexEntry{ProkounterVignette} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}
+---
+
+*Prokounter* is an R package for making flexible differential richness inference with 16S survey data. 
+
+The tool is motivated by the need to account for false taxa discoveries when making differential richness inferences. Because false taxa are generated in an abundance depenent fashion in 16S surveys, without appopriately controlling for their rates of generation, traditional approaches confound taxa differential abundance with differential richness. To overcome this problem, Prokounter, based on the assumption that most sub-genus discoveries in 16S surveys are false, exploits within-genus taxa accumulation data to generate a robust control. For methodological details, please refer the associated manuscript and the associated supplementary documents.  
+
+Prokounter controls can be integrated in other regression frameworks of your choice for richness analyses.
+
+We recommend not to filter your dataset so that we do not lose information on error-like low abundant, sparse taxa and their accumulation rates. 
+
+# Summary of available functions
+* There are three major functions that you can exploit for differential richness inference between sample groups: 
+  + comparison of *sample-wide* richness: _prokounter::getDRforSampleGroups()_. 
+  + comparison of *genus-specific* richness : _prokounter::getDRforGenera()_
+  + comparisons of larger *collections of genera* e.g., phyla :  _prokounter::getDRforTaxaCollection()_. 
+
+
+The following presents examples for each of these functions based on the \emph{mouse} diet (Turnbaugh et al., 2009) study available from the package \emph{metagenomeSeq}. All are based on generating a control for false discoveries with _prokounter::getProkounterTrends()_ function. 
+
+## Load data
+```{r, message=FALSE}
+library(metagenomeSeq)
+library(prokounter)
+data(mouseData)
+```
+
+## Generating the control
+
+Obtain a smoothing spline model fit for within-genus taxa accumulation data. 
+```{r, message=FALSE}
+taxaBySamplesCountMatrix <- MRcounts(mouseData, norm=FALSE)
+genus <- as.character(fData(mouseData)$genus)
+pkt <- prokounter::getProkounterTrends( mat = taxaBySamplesCountMatrix,genus=genus)
+#the rownames of the design matrix must contain corresponding sample names.
+des <- model.matrix( ~diet,  pData(mouseData) ) 
+```
+
+## Sample-wide differntial richness inference
+We ask if sample-wise richness 
+```{r, message=FALSE}
+dr.sw <- getDRforSampleGroups( pkobj=pkt, des = des  )
+dr.sw$tab
+```
+
+
+## Genus-specific differential richness inference
+We ask which genera are differentially rich between sample-groups. 
+```{r, message=FALSE}
+dr.gw <- getDRforGenera( pkobj=pkt, des = des )
+#dr.gw$tab 
+dr.gw$tab$desdietWestern[ p.adjust( dr.gw$tab$desdietWestern$Pr...z..,"BH" ) < .1, ]
+```
+
+## Taxa collection-wise differential richness. 
+We ask which phyla are found to be differentially rich between sample-groups.  
+```{r, message=FALSE}
+genus2collection <- fData(mouseData)[,c("genus", "phylum")]
+dr.cw <- getDRforTaxaCollection( pkobj=pkt, des = des, genus2collection=genus2collection )
+#dr.cw$tab
+dr.cw$tab$desdietWestern[ p.adjust( dr.cw$tab$desdietWestern$Pr...z..,"BH" ) < .1, ]
+```
+
+
+Finally, to get a sense of the reproducibility of inferences over the fitted smoothing splines, boostrap-t confidence intervals for sample-wide richness can be obtained from _prokounter::getDRforSampleGroups.bootWholeData()_ . Please refer the corresponding function documentation.  
