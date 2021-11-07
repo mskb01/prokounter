@@ -1,8 +1,9 @@
 
-
+```{r}
 #installation
 library(devtools)
 devtools::install_github("mskb01/prokounter") 
+
 
 #usage
 library(prokounter)
@@ -10,3 +11,4 @@ library(prokounter)
 ?prokounter:::getDRforSampleGroups()
 ?prokounter:::getDRforGenera()
 ?prokounter:::getDRforTaxaCollection()
+```
