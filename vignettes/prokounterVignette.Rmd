@@ -70,4 +70,4 @@ dr.cw$tab$desdietWestern[ p.adjust( dr.cw$tab$desdietWestern$Pr...z..,"BH" ) < .
 ```
 
 
-Finally, to get a sense of the reproducibility of inferences over the fitted smoothing splines, boostrap-t confidence intervals for sample-wide richness can be obtained from _prokounter::getDRforSampleGroups.bootWholeData()_ . Please refer the corresponding function documentation.  
+If needed, a developmental function _prokounter::getDRforSampleGroups.bootWholeData()_ can be used to assess reproducibility of inferences over fitted smoothing splines with boostrap t intervals for sample-wide richness. Please refer the corresponding function documentation.  
