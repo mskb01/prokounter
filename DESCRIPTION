@@ -6,11 +6,14 @@ Version: 0.1.0
 Author: M. Senthil Kumar
 Maintainer: The package maintainer <senthil@ds.dfci.harvard.edu>
 Description: The tool is motivated by the need to control for false discoveries generated in a survey, when performing differential richness inference in microbiome surveys. Because false discoveries are generated in an abundance depenent fashion in 16S surveys, without appopriate controls, an analyst might confound taxa differential abundance with differential richness inference with traditional methods. To overcome this problem, Prokounter exploits within-genus taxa accumulation data to generate a control. For methodological details, please refer the associated manuscript.  
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+License: Artistic-2.0
 Encoding: UTF-8
 RoxygenNote: 7.1.2
 VignetteBuilder: knitr, rmarkdown
 Depends: knitr
+Imports: RColorBrewer, matrixStats, gss, stats, graphics, vegan, MASS,
+        doParallel, Biobase
+URL: https://github.com/mskb01/prokounter
+BugReports: https://github.com/mskb01/prokounter/issues
 NeedsCompilation: no
-Packaged: 2021-11-01 23:17:10 UTC; senthil
+Packaged: 2022-05-30 13:55:22 UTC; senthil

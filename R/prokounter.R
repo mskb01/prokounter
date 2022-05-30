@@ -2,32 +2,6 @@
   log(sum(w*exp(x)))
 }
 
-.getCols <- function(set="Set2", m=10, n2=1, ... ){
-  library(RColorBrewer)
-  colorRampPalette(brewer.pal(n = m,set))(n2)
-}
-
-.getColsForFactors <- function(gr,...){
-  #
-  # This function is useful for building colors for data points
-  #  when each datapoint is associated with some group.
-  # Any extra arguments passed are passed to the getCols function
-  #  above.
-  # For a given group information, builds the colors
-  # palette.
-  #
-  stopifnot(is.factor(gr))
-
-  cols <- rep(0,length(gr))
-  levs <- levels(gr)
-  cs <- .getCols(n2=length(levs), ...)
-  for(l in seq(1, length(levs))){
-    cols[ which(gr==levs[l]) ] <- cs[l]
-  }
-  list("cols"=cols, "map"=cbind( cs, levs ) )
-}
-
-
 #' Get recovered abundance dependent statistics for a given genus in each sample in the data.
 #'
 #' @param mat a taxa x samples matrix.
@@ -46,7 +20,7 @@
 #'         \item{ace.se - the standard error for the ACE estimate}
 #'         }
 .getRecovAbPat <- function(mat, genus, g,adt=TRUE){
-  library(vegan)
+  require(vegan)
 
   fi <- which( genus==g )
   sm <- colSums(mat[fi,,drop=FALSE])
@@ -63,8 +37,6 @@
     "ace.se"=divs["se.ACE",]
   )
 }
-
-
 
 #' Obtains the prokounter within-genus taxa accumulation trend.
 #'
@@ -97,6 +69,7 @@
 #'         \item{lm - log number of taxa for the genus across samples}
 #'         \item{samples - the sample name to which the row-wise entries correspond to}
 #'         \item{g - the genus name given}
+#'         \item{fit.proc - fitting procedure used}
 #'         \item{chao1 - the chao1 estimator as calculated from the package Vegan }
 #'         \item{chao1.se - the standard error fot the chao1 estimate }
 #'         \item{ace - the ACE estimator as calculated from the package Vegan }
@@ -121,10 +94,10 @@ getProkounterTrends <- function(mat, genus,
 ) {
   #prokounter has been changed to getProkounterTrends here.
 
-  library(matrixStats)
-  library(gss)
-  library(RColorBrewer)
-  library(MASS)
+  require(matrixStats)
+  require(gss)
+  require(RColorBrewer)
+  require(MASS)
 
   stopifnot( nrow(mat) == length(genus) )
 
@@ -187,42 +160,52 @@ getProkounterTrends <- function(mat, genus,
   RES$fit <- fit
   RES$df <- df
   RES$ug <- ug
+  RES$fit.proc <- fit.proc
 
   if(plt){
-    cc <- .getColsForFactors( factor( df$g, levels=unique(df$g) ), set="Set3" )
-    if(fit.proc == "ss"){
-      lrvec <- seq(min(df$lr), max(df$lr), .1)
-      newd = data.frame( "lr"= rep(lrvec,
-                                   each=length(g2ft) ),
-                         "g"= rep( g2ft,
-                                   each=length( lrvec)
-                         )
-      )
-      ng <- length( df$g )
-      ltv <- predict( fit, newdata=newd[,"lr",drop=FALSE], include=c( "1", "lr"), se.fit=TRUE);
-      plot( df$lm ~ df$lr, col = cc$cols, xlab = "Log Recovered Abundance", ylab = "Log Num. Taxa" )
-      abline( h=0 )
-      o <- order( newd$lr)
-      lines( ltv$fit[o] ~ newd$lr[o], col = 'red', cex=.5 )
-      lines( (ltv$fit[o]+1.96*ltv$se[o]) ~ newd$lr[o], col = 'red', cex=.5, lty=2 )
-      lines( (ltv$fit[o]-1.96*ltv$se[o]) ~ newd$lr[o], col = 'red', cex=.5, lty=2 )
-      points( df$lm[fit$id.basis] ~ df$lr[ fit$id.basis ], pch=23, col = 'blue', bg='blue' )
-    } else if( fit.proc=="lo" ){
-      lrvec <- seq(min(df$lr), max(df$lr), .1)
-      newd = data.frame( "lr"= lrvec )
-      ltv <- predict( fit, newdata=newd,se=TRUE ); abline( h=0 )
-      plot( df$lm ~ df$lr, col = cc$cols, xlab = "Log Recovered Abunadnce", ylab = "Log Num. Taxa" )
-      o <- order( newd$lr )
-      lines( ltv$fit[o] ~ newd$lr[o], col = 'red', cex=.5 )
-      lines( (ltv$fit[o]+1.96*ltv$se[o]) ~ newd$lr[o], col = 'red', cex=.5, lty=2 )
-      lines( (ltv$fit[o]-1.96*ltv$se[o]) ~ newd$lr[o], col = 'red', cex=.5, lty=2 )
+    .plot.fr( pkobj )
     }
-
-  }
 
   RES
 
 }
+
+#' Plots the fitted \code{fR} trend from the manuscript.
+#' @param pkobj the output object of the getProkounterTrends() function.
+.plot.fr <- function(pkobj){
+  require(gss)
+  df <- pkobj$df
+  fit <- pkobj$fit
+  g2ft <-pkobj$ug
+  fit.proc <- pkobj$fit.proc
+  if(fit.proc == "ss"){
+    lrvec <- seq(min(df$lr), max(df$lr), .1)
+    newd = data.frame( "lr"= rep(lrvec,
+                                 each=length(g2ft) ),
+                       "g"= rep( g2ft,
+                                 each=length( lrvec)
+                       )
+    )
+    ng <- length( df$g )
+    ltv <- predict( fit, newdata=newd[,"lr",drop=FALSE], include=c( "1", "lr"), se.fit=TRUE);
+    plot( df$lm ~ df$lr, col = 'gray', cex=.5, xlab = "Log Recovered Abundance", ylab = "Log Number of Taxa" )
+    abline( h=0 )
+    o <- order( newd$lr)
+    lines( ltv$fit[o] ~ newd$lr[o], col = 'red', cex=.5 )
+    lines( (ltv$fit[o]+1.96*ltv$se[o]) ~ newd$lr[o], col = 'red', cex=.5, lty=2 )
+    lines( (ltv$fit[o]-1.96*ltv$se[o]) ~ newd$lr[o], col = 'red', cex=.5, lty=2 )
+  } else if( fit.proc=="lo" ){
+    lrvec <- seq(min(df$lr), max(df$lr), .1)
+    newd = data.frame( "lr"= lrvec )
+    ltv <- predict( fit, newdata=newd,se=TRUE ); abline( h=0 )
+    plot( df$lm ~ df$lr, col = 'gray', cex=.5, xlab = "Log Recovered Abunadnce", ylab = "Log Number of Taxa" )
+    o <- order( newd$lr )
+    lines( ltv$fit[o] ~ newd$lr[o], col = 'red', cex=.5 )
+    lines( (ltv$fit[o]+1.96*ltv$se[o]) ~ newd$lr[o], col = 'red', cex=.5, lty=2 )
+    lines( (ltv$fit[o]-1.96*ltv$se[o]) ~ newd$lr[o], col = 'red', cex=.5, lty=2 )
+  }
+}
+
 
 .getAccumControlForSamples <- function(pkobj, sample.names=unique( pkobj$df$samples ), fg.inc=TRUE, fg.sigs.only=TRUE ){
 
@@ -411,7 +394,7 @@ getDRforSampleGroups <- function( pkobj, des, resp.type=c("lm","chao1","ace"), g
                                   depth.inc =FALSE,
                                   fg.inc=TRUE,
                                   fg.sigs.only=TRUE,...  ){
-  library(MASS)
+  require(MASS)
   netlr <- aggregate( pkobj$df$lr, by=list(pkobj$df$samples), .lsume)
   resp.type <- resp.type[1]
   if(resp.type=="lm"){
@@ -632,7 +615,7 @@ getDRforTaxaCollection <- function(pkobj, des, genus2collection = NULL, resp.typ
 
 #' Bootstrap t confidence intervals for sample-wide differential richness inference form Prokounter.
 #'
-#' The procedure allows gauging reproducibility of inferences over the fitted prokounter trends (\code{ft} in manuscript) in \code{\link{getDRforSampleGroups}}.
+#' Developmental. The procedure aims to allow gauging reproducibility of inferences over the fitted prokounter trends (\code{ft} in manuscript) in \code{\link{getDRforSampleGroups}}.
 #' We strongly recommend experimenting with the number of bootstrap samples (parameter B), until the returned confidence intervals stabilize.
 #' We have found this to vary with data set size and complexities.
 #' The code can be adapted for genus-level richness inference.
@@ -666,20 +649,20 @@ getDRforTaxaCollection <- function(pkobj, des, genus2collection = NULL, resp.typ
 #' @export
 #' @seealso \code{\link{getDRforGenera}}, \code{\link{getDRforSampleGroups}}
 getDRforSampleGroups.bootWholeData <- function(esetobj,  des, genusLabel="Genus", ncore=4, B=5000, alpha=.05, ...){
-  library(doParallel)
-  library(MASS)
+  require(doParallel)
+  require(MASS)
 
   cl <- makeCluster( ncore )
   registerDoParallel(cl)
 
   bfn <- function( esetobj, des,... ){
-    library(metagenomeSeq)
+    require(Biobase)
 
     tryCatch({
       si <- sample( seq(ncol( esetobj )), size = ncol(esetobj), replace = TRUE  )
       pkobj <- prokounter::getProkounterTrends( mat = exprs(esetobj[,si]),
                                                 genus = as.character(fData(esetobj[,si])[[genusLabel]]),
-                                                fit.proc = "ss", plt=FALSE, kn.rand = TRUE
+                                                fit.proc = "ss", plt=FALSE, ...
       )
       desb <- des[si,,drop=FALSE]
       getDRforSampleGroups( pkobj = pkobj, des=desb, ... )

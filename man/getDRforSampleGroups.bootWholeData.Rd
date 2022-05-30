@@ -37,7 +37,7 @@ A list where each entry holds the results for regression coefficients correspond
 }
 }
 \description{
-The procedure allows gauging reproducibility of inferences over the fitted prokounter trends (\code{ft} in manuscript) in \code{\link{getDRforSampleGroups}}.
+Developmental. The procedure aims to allow gauging reproducibility of inferences over the fitted prokounter trends (\code{ft} in manuscript) in \code{\link{getDRforSampleGroups}}.
 We strongly recommend experimenting with the number of bootstrap samples (parameter B), until the returned confidence intervals stabilize.
 We have found this to vary with data set size and complexities.
 The code can be adapted for genus-level richness inference.

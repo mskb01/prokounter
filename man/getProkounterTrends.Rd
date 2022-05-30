@@ -49,6 +49,7 @@ A list with three components.
         \item{lm - log number of taxa for the genus across samples}
         \item{samples - the sample name to which the row-wise entries correspond to}
         \item{g - the genus name given}
+        \item{fit.proc - fitting procedure used}
         \item{chao1 - the chao1 estimator as calculated from the package Vegan }
         \item{chao1.se - the standard error fot the chao1 estimate }
         \item{ace - the ACE estimator as calculated from the package Vegan }
