@@ -11,7 +11,7 @@ Encoding: UTF-8
 RoxygenNote: 7.1.2
 VignetteBuilder: knitr, rmarkdown
 Depends: knitr
-Imports: RColorBrewer, matrixStats, gss, stats, graphics, vegan, MASS,
+Imports: matrixStats, gss, stats, graphics, vegan, MASS,
         doParallel, Biobase
 URL: https://github.com/mskb01/prokounter
 BugReports: https://github.com/mskb01/prokounter/issues
